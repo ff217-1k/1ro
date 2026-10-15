@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>San Jorge — La Historia de Juan</title>
+<style>
+    body {
+        background: #08080a;
+        color: #b8b8b8;
+        font-family: 'Georgia', serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    #game-container {
+        max-width: 680px;
+        width: 100%;
+        padding: 30px;
+        border: 1px solid #202024;
+        border-radius: 8px;
+        background: #0f0f12;
+        box-shadow: 0 0 50px rgba(0,0,0,0.9);
+    }
+    #day-tag {
+        font-size: 0.8em;
+        letter-spacing: 4px;
+        color: #6a6a72;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        min-height: 18px;
+    }
+    h1 {
+        font-size: 1.5em;
+        color: #ded6c8;
+        font-weight: normal;
+        letter-spacing: 1px;
+        margin: 0 0 20px 0;
+    }
+    #scene-text {
+        font-size: 1.08em;
+        line-height: 1.85;
+        min-height: 260px;
+        margin: 20px 0;
+        text-align: left;
+        color: #a8a8ae;
+        transition: opacity 0.8s;
+    }
+    #scene-text p { margin: 0 0 14px 0; }
+    .quote { color: #cbb9a0; font-style: italic; }
+    .welcome {
+        text-align: center;
+        font-size: 2em;
+        letter-spacing: 8px;
+        color: #ded6c8;
+        margin-top: 100px;
+        font-weight: normal;
+    }
+    .choice-btn {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+        padding: 14px;
+        background: #16161a;
+        color: #b8b8b8;
+        border: 1px solid #2c2c32;
+        border-radius: 4px;
+        font-family: 'Georgia', serif;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background 0.3s, border-color 0.3s, color 0.3s;
+        text-align: center;
+        letter-spacing: 1px;
+    }
+    .choice-btn:hover {
+        background: #202027;
+        border-color: #4a4a55;
+        color: #ded6c8;
+    }
+    #play-btn {
+        padding: 16px 46px;
+        font-size: 1.15em;
+        background: #16161a;
+        color: #ded6c8;
+        border: 1px solid #4a4a55;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: 'Georgia', serif;
+        letter-spacing: 2px;
+        transition: background 0.3s, box-shadow 0.3s;
+    }
+    #play-btn:hover {
+        background: #202027;
+        box-shadow: 0 0 20px rgba(120,120,140,0.2);
+    }
+    .ending {
+        color: #ded6c8;
+        font-style: italic;
+        margin-top: 24px;
+        text-align: center;
+        line-height: 1.9;
+    }
+    .fade-in { animation: fadeIn 1.4s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+<div id="game-container">
+    <div id="day-tag"></div>
+    <h1>San Jorge</h1>
+    <div id="scene-text">
+        <p class="welcome">BIENVENIDO</p>
+    </div>
+    <div id="choices"></div>
+    <button id="play-btn" onclick="startGame()">Play Game</button>
+
+    <!-- Sonido principal (fondo) -->
+    <audio id="bg-music" src="https://files.catbox.moe/61rm82.mp3" loop></audio>
+    <!-- Sonido para el primer beso -->
+    <audio id="music-kiss" src="https://files.catbox.moe/1x6q6i.mp3" loop></audio>
+    <!-- Sonido para el final feliz -->
+    <audio id="music-final" src="https://files.catbox.moe/lrojs1.mp3" loop></audio>
+</div>
+
+<script>
+const scenes = {
+    welcome: {
+        day: "",
+        text: `<p class="welcome">BIENVENIDO</p>`,
+        next: "inicio"
+    },
+
+    inicio: {
+        day: "Octavo",
+        text: `<p>Me llamo Juan. Tengo 17 años.</p>
+               <p>Y todo empezó el día en que entré al colegio San Jorge.</p>
+               <p>Estaba en octavo. No conocía a nadie. No sabía dónde quedaban las aulas. Solo sabía que era nuevo y que me daba miedo empezar de cero.</p>
+               <p>Ese primer día caminé por los pasillos con la mochila apretada contra el pecho, como si eso me protegiera de algo.</p>`,
+        next: "octavo1"
+    },
+
+    octavo1: {
+        day: "Octavo",
+        text: `<p>Me senté en la última fila. Nadie me habló. Nadie me miró.</p>
+               <p>Y así pasaron los primeros días. Solo. En silencio. Mirando el reloj y esperando que sonara el timbre para irme a casa.</p>
+               <p>Hasta que un día, en la hora de educación física, un chico se me acercó con una pelota en las manos y una sonrisa enorme.</p>
+               <p class="quote">«Oye, tú. ¿Juegas o qué?»</p>
+               <p>Se llamaba Jair.</p>`,
+        next: "octavo2"
+    },
+
+    octavo2: {
+        day: "Octavo",
+        text: `<p>Jair era de esas personas que hablan con todos. Que se ríen fuerte. Que no tienen miedo de nada.</p>
+               <p>Ese día jugamos hasta que nos llamaron la atención. Y al día siguiente, me esperó en la entrada como si fuéramos amigos de toda la vida.</p>
+               <p class="quote">«Juan, ¿ya hiciste la tarea de mate? Pásame, pues.»</p>
+               <p>Y así, sin darme cuenta, dejé de estar solo.</p>`,
+        next: "octavo3"
+    },
+
+    octavo3: {
+        day: "Octavo",
+        text: `<p>Con Jair empecé a compartir todo en el colegio.</p>
+               <p>Nos sentábamos juntos. Copiábamos tareas. Jugábamos fútbol en el recreo. Nos reíamos de cualquier tontería hasta que nos dolía el estómago.</p>
+               <p>En la hora de la salida, muchas veces nos íbamos al parque que quedaba a dos cuadras, o a comprar algo por ahí. Un pan, un jugo, cualquier cosa. No importaba qué, importaba con quién.</p>
+               <p>Jair se volvió mi mejor amigo sin que ninguno de los dos lo dijera.</p>`,
+        next: "octavo4"
+    },
+
+    octavo4: {
+        day: "Octavo",
+        text: `<p>Pasaron los meses. El San Jorge dejó de ser un lugar extraño y empezó a ser mi lugar.</p>
+               <p>Ya sabía los nombres de los profesores. Ya sabía qué baño estaba siempre sucio. Ya sabía dónde se escondía Jair cuando llegaba tarde.</p>
+               <p>Y por primera vez en mucho tiempo, era feliz. Feliz de verdad.</p>
+               <p>Sin darme cuenta, octavo se terminó. Y llegó noveno.</p>`,
+        next: "noveno1"
+    },
+
+    noveno1: {
+        day: "Noveno",
+        text: `<p>Noveno empezó distinto.</p>
+               <p>Los profesores eran más estrictos, las tareas más largas, todo más serio.</p>
+               <p>Pero lo que de verdad cambió mi año no fue nada de eso.</p>
+               <p>Fue una chica. Se llamaba Cristhel.</p>`,
+        next: "noveno2"
+    },
+
+    noveno2: {
+        day: "Noveno",
+        text: `<p>La vi el primer día de clases. Estaba al otro lado del pasillo, hablando con sus amigas, riéndose de algo que no alcancé a escuchar.</p>
+               <p>Y me quedé mirándola más de lo que debería.</p>
+               <p>Jair me dio un codazo y se rió.</p>
+               <p class="quote">«¿Y esa? Ya te vi, Juan. Ya te vi.»</p>
+               <p>Yo me hice el tonto. Pero por dentro ya sabía que algo estaba pasando.</p>`,
+        next: "noveno3"
+    },
+
+    noveno3: {
+        day: "Noveno",
+        text: `<p>Empecé a hablarle poco a poco.</p>
+               <p>Primero un "hola". Después una pregunta tonta sobre la tarea. Después una broma. Después cualquier excusa para quedarme un rato más cerca de ella.</p>
+               <p>Y ella respondía. Se reía. Me seguía la conversación.</p>
+               <p>Cada vez que me sonreía, yo sentía que el día entero valía la pena.</p>`,
+        next: "noveno4"
+    },
+
+    noveno4: {
+        day: "Noveno",
+        text: `<p>A las 10:10 salíamos al recreo. Todos los días.</p>
+               <p>Y todos los días, yo buscaba con la mirada dónde estaba ella. Si estaba cerca, me acercaba. Si estaba lejos, esperaba el momento.</p>
+               <p>El recreo se volvió mi hora favorita del día. No por el descanso. Por ella.</p>
+               <p>Jair me decía: <span class="quote">«Ya no juegas fútbol conmigo, Juan.»</span></p>
+               <p>Y yo le decía que sí, que después. Que mañana. Que la próxima.</p>`,
+        next: "noveno5"
+    },
+
+    noveno5: {
+        day: "Noveno",
+        text: `<p>Pasaron los días. Y empezamos a hablar por TikTok.</p>
+               <p>Primero mensajes cortos. Después conversaciones hasta la madrugada. Después audios. Después de todo.</p>
+               <p>Me contaba de su familia. De sus amigas. De sus miedos. De las cosas que nadie sabía.</p>
+               <p>Y yo le contaba de mí. De mi casa. De mi papá. De todo.</p>
+               <p>Nos fuimos conociendo más y más. Hasta que un día me di cuenta de algo que ya no podía esconder ni de mí mismo.</p>`,
+        next: "noveno6"
+    },
+
+    noveno6: {
+        day: "Noveno",
+        text: `<p>Me enamoré primero.</p>
+               <p>Fui yo el que se enamoró antes. El que pensaba en ella todo el día. El que revisaba el celular cada cinco minutos. El que se arreglaba un poco más antes de ir al colegio, por si la veía.</p>
+               <p>No sabía si ella sentía lo mismo. No me atrevía a preguntarlo.</p>
+               <p>Pero una vez, en la hora del recreo, me armé de valor.</p>`,
+        next: "noveno7"
+    },
+
+    noveno7: {
+        day: "Noveno",
+        text: `<p>Fue en el patio, cerca de las gradas. Ella estaba con una amiga, pero la amiga se fue cuando me vio llegar.</p>
+               <p>Me quedé parado enfrente de ella. Con las manos sudando. Con el corazón latiéndome tan fuerte que pensé que ella lo escucharía.</p>
+               <p>Y le dije todo. Lo que sentía. Lo que significaba para mí. Lo que quería.</p>
+               <p class="quote">«Cristhel… ¿quieres ser mi novia?»</p>`,
+        next: "noveno8"
+    },
+
+    noveno8: {
+        day: "Noveno",
+        text: `<p>Se quedó callada un segundo. Un segundo que se me hizo eterno.</p>
+               <p>Y después sonrió.</p>
+               <p class="quote">«Sí, Juan. Sí quiero.»</p>
+               <p>Me puse tan feliz que no supe qué hacer con las manos. Ni con la cara. Ni con nada. Solo me reí como un tonto y ella se rió conmigo.</p>
+               <p>Ese día fui la persona más feliz del San Jorge. Estoy seguro.</p>`,
+        next: "noveno9"
+    },
+
+    noveno9: {
+        day: "Noveno",
+        text: `<p>Nuestro primer beso fue en una panadería.</p>
+               <p>Habíamos salido a caminar después del colegio. Entramos a comprar algo. No había casi nadie. Solo nosotros dos, el olor a pan caliente, y el ruido de la máquina de café.</p>
+               <p>Ella me miró. Yo la miré.</p>
+               <p>Y nos besamos. Sin decir nada. Sin planearlo.</p>
+               <p>Fue el mejor momento de mi vida hasta ese entonces.</p>`,
+        next: "noveno10"
+    },
+
+    noveno10: {
+        day: "Noveno",
+        text: `<p>Y así empezó todo.</p>
+               <p>Cristhel y yo éramos novios. Jair seguía siendo mi mejor amigo. Y los tres empezábamos a andar juntos por el San Jorge.</p>
+               <p>En los recreos nos sentábamos los tres en las gradas. En la salida, muchas veces nos íbamos a comprar algo: un pan, unas papas, un jugo. Cualquier cosa.</p>
+               <p>Los tres. Siempre los tres.</p>`,
+        next: "tres1"
+    },
+
+    tres1: {
+        day: "Noveno",
+        text: `<p>Había veces, claro, en que yo quería estar solo con Cristhel.</p>
+               <p>Y entonces me acercaba a Jair, le daba un empujón jugando y le decía bajito:</p>
+               <p class="quote">«Oye, déjame a solas con mi novia, jeje.»</p>
+               <p>Jair se reía. Me empujaba de vuelta. Y se iba diciendo: <span class="quote">«Ya, pues. Pero me debes una.»</span></p>
+               <p>Y yo me quedaba con Cristhel. Y ella se reía. Y yo me sentía el chico más afortunado del mundo.</p>`,
+        next: "tres2"
+    },
+
+    tres2: {
+        day: "Noveno",
+        text: `<p>También había chicos malos en el colegio. De esos que se creen mucho. De esos que buscan problemas.</p>
+               <p>Algunos empezaron a molestar a Cristhel. Le decían cosas. Se le acercaban cuando ella estaba sola. Le querían hacer daño.</p>
+               <p>Y yo no lo permití. Nunca.</p>`,
+        next: "tres3"
+    },
+
+    tres3: {
+        day: "Noveno",
+        text: `<p>La primera vez fue en el pasillo, cerca de los baños.</p>
+               <p>Estaban tres de ellos rodeándola. Ella estaba incómoda. Se quería ir.</p>
+               <p>Y yo llegué. Me puse en medio. Sin gritar. Sin pelear. Solo me puse ahí.</p>
+               <p class="quote">«Si quieren algo con ella, van a tener que pasar por mí.»</p>
+               <p>Me miraron. Midieron. Y se fueron. Sin más.</p>`,
+        next: "tres4"
+    },
+
+    tres4: {
+        day: "Noveno",
+        text: `<p>No pasó una vez. Pasó varias.</p>
+               <p>Cada vez que alguien se acercaba de más, yo estaba ahí. Cada vez que alguien la molestaba, yo aparecía.</p>
+               <p>Jair también. Jair estaba siempre conmigo. Cuando él no estaba, yo estaba. Cuando yo no estaba, él estaba.</p>
+               <p>Los dos la cuidábamos. Porque era mi novia. Y porque Jair también la quería, como amiga, como parte del grupo.</p>
+               <p>Los chicos malos dejaron de intentarlo. Sabían que con nosotros dos no podían.</p>`,
+        next: "tres5"
+    },
+
+    tres5: {
+        day: "Noveno",
+        text: `<p>Y así pasaron los meses.</p>
+               <p>Los tres juntos. Los recreos, las salidas, las compras rápidas, las risas. Todo.</p>
+               <p>Y aunque yo a veces le dijera a Jair <span class="quote">«déjame a solas con mi novia, jeje»</span>, al rato siempre volvíamos a estar los tres. Porque así era como debía ser.</p>
+               <p>Noveno terminó sin que ninguno de los tres se diera cuenta.</p>`,
+        next: "verano1"
+    },
+
+    verano1: {
+        day: "Vacaciones",
+        text: `<p>Llegaron las vacaciones.</p>
+               <p>Los padres de Cristhel eran estrictos. Casi no la dejaban salir. Solo podía salir si iban a algún lugar específico, y por poco tiempo.</p>
+               <p>Así que las salidas eran contadas. Planeadas. Especiales.</p>
+               <p>Cada vez que Cristhel conseguía permiso, yo le escribía a Jair corriendo. Y los tres hacíamos lo posible por vernos.</p>`,
+        next: "verano2"
+    },
+
+    verano2: {
+        day: "Vacaciones",
+        text: `<p>Nos íbamos a la panadería de siempre. Al parque de siempre. A cualquier lado.</p>
+               <p>Cristhel siempre llegaba sonriendo. Le decía a sus papás que iba a la casa de una amiga, pero se venía a vernos.</p>
+               <p>Y aunque eran solo dos horas. Aunque tenía que volver temprano. Aunque no alcanzaba para todo.</p>
+               <p>Esas dos horas valían más que cualquier día entero.</p>`,
+        next: "verano3"
+    },
+
+    verano3: {
+        day: "Vacaciones",
+        text: `<p>En las vacaciones, Cristhel me escribía todas las noches.</p>
+               <p>Me contaba cómo eran sus días en casa. Me mandaba fotos de su cuarto, de su comida, de sus cuadernos. Me pedía que le contara todo lo que yo hacía.</p>
+               <p>Yo le contaba. Y ella me decía que me extrañaba. Y yo le decía que yo también.</p>
+               <p>Y aunque los papás de ella no supieran, para nosotros esas conversaciones eran nuestro lugar seguro.</p>`,
+        next: "verano4"
+    },
+
+    verano4: {
+        day: "Vacaciones",
+        text: `<p>Jair también seguía ahí.</p>
+               <p>Nos veíamos en la casa de él, o en el parque, o en cualquier lugar. Y aunque Cristhel no estuviera, seguíamos siendo los mismos.</p>
+               <p>Me preguntaba por ella. Se alegraba cuando le contaba que nos habíamos visto.</p>
+               <p class="quote">«¿Y ya le dijiste que la quieres?»</p>
+               <p class="quote">«Sí, obvio.»</p>
+               <p class="quote">«Bien, Juan. Bien.»</p>`,
+        next: "verano5"
+    },
+
+    verano5: {
+        day: "Vacaciones",
+        text: `<p>Y así se pasaron las vacaciones.</p>
+               <p>Rápido, como todo lo bueno.</p>
+               <p>Sin darnos cuenta, llegó el primer día de un nuevo año. Y con él, una nueva etapa.</p>
+               <p>Cristhel pasaba a décimo. Y yo y Jair pasábamos a primero de bachillerato.</p>`,
+        next: "primero1"
+    },
+
+    primero1: {
+        day: "1ro de Bachillerato",
+        text: `<p>Primer día de primero de bachillerato.</p>
+               <p>Todo era distinto. Los salones eran otros. Los profesores eran otros. Los compañeros eran otros.</p>
+               <p>Pero yo no estaba solo. Tenía a Jair. Y a un pasillo de distancia, a Cristhel.</p>
+               <p>Nos sentamos juntos en el primer día. Jair y yo. Como antes. Como siempre.</p>`,
+        next: "primero2"
+    },
+
+    primero2: {
+        day: "1ro de Bachillerato",
+        text: `<p>Cristhel estaba en décimo. Tenía a sus amigas. Yo las conocía. A algunas las quería, a otras no tanto.</p>
+               <p>Yo tenía a Jair. Y Jair me tenía a mí. Y aunque Cristhel tenía su grupo y yo el mío, siempre nos buscábamos.</p>
+               <p>En el recreo, a las 10:10, ella venía a las gradas donde estábamos Jair y yo. O yo iba a donde estaba ella. O nos encontrábamos a mitad de camino.</p>
+               <p>Siempre nos encontrábamos.</p>`,
+        next: "primero3"
+    },
+
+    primero3: {
+        day: "1ro de Bachillerato",
+        text: `<p>Cristhel seguía con sus papás encima. Casi no la dejaban salir.</p>
+               <p>Solo cuando iban a algún lugar, solo cuando era con permiso, solo cuando el tiempo alcanzaba… ahí podíamos vernos.</p>
+               <p>Y aunque no era siempre. Aunque eran ratos cortos. Cada vez que la veía se me olvidaba todo.</p>
+               <p>La espera. La distancia. Los permisos. Todo.</p>`,
+        next: "primero4"
+    },
+
+    primero4: {
+        day: "1ro de Bachillerato",
+        text: `<p>Los chicos malos también llegaron a primero.</p>
+               <p>Y también empezaron a molestar. Pero ya sabían. Ya sabían que con Cristhel no se metían.</p>
+               <p>Una vez uno intentó. Uno nuevo. No sabía cómo era la cosa.</p>
+               <p>Yo me puse ahí. Jair se puso a mi lado. Y el chico entendió rápido.</p>
+               <p class="quote">«Ya, ya. No sabía. No pasa nada.»</p>
+               <p>Y se fue. Y Cristhel me miró y me sonrió. Y yo me sentí el hombre más grande del mundo.</p>`,
+        next: "primero5"
+    },
+
+    primero5: {
+        day: "1ro de Bachillerato",
+        text: `<p>Los meses pasaron.</p>
+               <p>Primero de bachillerato fue duro. Tareas. Exámenes. Profesores que no perdonaban. Todo pesado.</p>
+               <p>Pero yo tenía a Jair para las risas. Y a Cristhel para el corazón.</p>
+               <p>Y aunque no la veía todo lo que quería, aunque sus papás seguían siendo estrictos, aunque a veces los planes se caían…</p>
+               <p>Yo era feliz. De verdad lo era.</p>`,
+        next: "primero6"
+    },
+
+    primero6: {
+        day: "1ro de Bachillerato",
+        text: `<p>Los tres seguíamos saliendo.</p>
+               <p>Cuando Cristhel conseguía permiso, le escribía a Jair y le decía: <span class="quote">«Voy a salir un rato, ¿vamos a comprar algo?»</span></p>
+               <p>Y Jair me escribía a mí. Y yo me arreglaba rápido y salía.</p>
+               <p>Nos íbamos a la panadería. O al parque. O a cualquier tienda de la esquina.</p>
+               <p>Comprábamos algo. Cualquier cosa. Y nos sentábamos a hablar.</p>
+               <p>Los tres. Como siempre.</p>`,
+        next: "primero7"
+    },
+
+    primero7: {
+        day: "1ro de Bachillerato",
+        text: `<p>Y también seguía habiendo momentos en que yo quería estar solo con ella.</p>
+               <p>Le decía a Jair: <span class="quote">«Oye, déjame a solas con mi novia, jeje.»</span></p>
+               <p>Y Jair, como siempre, se reía. Me empujaba. Y se iba.</p>
+               <p class="quote">«Ya, pues. Pero me debes una hamburguesa.»</p>
+               <p>Y se alejaba. Y yo me quedaba con Cristhel. Y nos tomábamos de la mano. Y no hablábamos. Y no hacía falta.</p>`,
+        next: "hoy1"
+    },
+
+    hoy1: {
+        day: "Hoy",
+        text: `<p>Y así pasó el año.</p>
+               <p>Sin peleas grandes. Sin traiciones. Sin dramas. Sin nada de eso.</p>
+               <p>Solo días. Uno tras otro. Recreos, salidas, panaderías, risas, permisos conseguidos a duras penas, y un montón de momentos pequeños que no parecían importantes pero que eran todo.</p>
+               <p>Y sin darme cuenta, se cumplió un año entero.</p>`,
+        next: "hoy2"
+    },
+
+    hoy2: {
+        day: "Hoy",
+        text: `<p>Hoy sigo con Cristhel.</p>
+               <p>Hoy sigo con Jair.</p>
+               <p>Los tres seguimos. Con nuestros problemas, con las tareas, con los papás de ella que no aflojan, con los exámenes que no perdonan.</p>
+               <p>Pero seguimos. Y eso es más de lo que muchos pueden decir.</p>`,
+        next: "hoy3"
+    },
+
+    hoy3: {
+        day: "Hoy",
+        text: `<p>Hoy, cuando salimos del colegio, a veces nos vamos los tres a comprar algo.</p>
+               <p>Hoy, cuando quiero estar solo con Cristhel, le digo a Jair: <span class="quote">«déjame a solas con mi novia, jeje.»</span></p>
+               <p>Hoy, cuando alguien se quiere pasar de listo con ella, yo estoy ahí. Y Jair también.</p>
+               <p>Hoy, cuando sus papás la dejan salir un rato, nosotros tres lo aprovechamos como si fuera el último día.</p>`,
+        next: "hoy4"
+    },
+
+    hoy4: {
+        day: "Hoy",
+        text: `<p>No sé qué va a pasar mañana.</p>
+               <p>No sé si Cristhel y yo vamos a durar para siempre. No sé si Jair y yo vamos a seguir siendo amigos toda la vida.</p>
+               <p>Pero sí sé algo.</p>
+               <p>Sé que hoy soy feliz. Y que ellos dos son parte de esa felicidad.</p>`,
+        next: "final"
+    },
+
+    final: {
+        day: "Final",
+        text: `<p>Me llamo Juan. Tengo 17 años. Estoy en primero de bachillerato en el San Jorge.</p>
+               <p>Tengo una novia que se llama Cristhel. Y tengo un mejor amigo que se llama Jair.</p>
+               <p>Y aunque no todo es perfecto, aunque hay días difíciles, aunque hay cosas que no puedo controlar…</p>
+               <p>Soy feliz.</p>
+               <p>Y ellos también.</p>`,
+        next: null
+    }
+};
+
+const sceneText = document.getElementById("scene-text");
+const choicesDiv = document.getElementById("choices");
+const playBtn = document.getElementById("play-btn");
+const musicBg = document.getElementById("bg-music");
+const musicKiss = document.getElementById("music-kiss");
+const musicFinal = document.getElementById("music-final");
+const dayTag = document.getElementById("day-tag");
+
+function startGame() {
+    playBtn.style.display = "none";
+    musicBg.volume = 0.7;
+    musicBg.play().catch(e => console.log("Audio bloqueado:", e));
+    renderScene("welcome");
+}
+
+function renderScene(key) {
+    const scene = scenes[key];
+
+    // Detener sonidos especiales al cambiar de escena
+    musicKiss.pause();
+    musicKiss.currentTime = 0;
+    musicFinal.pause();
+    musicFinal.currentTime = 0;
+
+    // Reproducir sonido especial según la escena
+    if (key === "noveno9") {
+        musicKiss.volume = 0.8;
+        musicKiss.play().catch(e => console.log("Audio bloqueado:", e));
+    } else if (key === "final") {
+        musicFinal.volume = 0.8;
+        musicFinal.play().catch(e => console.log("Audio bloqueado:", e));
+    }
+
+    sceneText.classList.remove("fade-in");
+    void sceneText.offsetWidth;
+    sceneText.innerHTML = scene.text;
+    sceneText.classList.add("fade-in");
+
+    dayTag.textContent = scene.day || "";
+    dayTag.classList.remove("fade-in");
+    void dayTag.offsetWidth;
+    dayTag.classList.add("fade-in");
+
+    choicesDiv.innerHTML = "";
+
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+
+    if (scene.next) {
+        btn.textContent = "Continuar";
+        btn.onclick = () => renderScene(scene.next);
+        choicesDiv.appendChild(btn);
+    } else {
+        btn.style.display = "none";
+        const end = document.createElement("p");
+        end.className = "ending";
+        end.textContent = "Fin. Y fueron felices.";
+        choicesDiv.appendChild(end);
+    }
+}
+</script>
+</body>
+</html>
